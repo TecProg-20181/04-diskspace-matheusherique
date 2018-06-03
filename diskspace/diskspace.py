@@ -2,45 +2,55 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-
 import argparse
 import os
 import subprocess
 import re
+from contracts import contract
+
 
 
 # ==== Arguments ====
 
-parser = argparse.ArgumentParser(
+PARSER = argparse.ArgumentParser(
     description='Analizes and reports the disk usage per folder'
 )
-parser.add_argument('directory', metavar='DIR', type=str, nargs='?',
+PARSER.add_argument('directory', metavar='DIR', type=str, nargs='?',
                     default='.', help='Directory to be analized')
-parser.add_argument('-o', '--order', type=str, default='desc',
+PARSER.add_argument('-o', '--order', type=str, default='desc',
                     choices=['desc', 'asc'],
                     help='The file order inside each folder')
-parser.add_argument('-s', '--hide', type=int, default=0,
+PARSER.add_argument('-s', '--hide', type=int, default=0,
                     help='Hides all files that have a percentage lower than '
                          'this value')
-group = parser.add_mutually_exclusive_group()
-group.add_argument('-a', '--all', help='Shows the full tree',
+GROUP = PARSER.add_mutually_exclusive_group()
+GROUP.add_argument('-a', '--all', help='Shows the full tree',
                    action='store_true')
-group.add_argument('-d', '--depth',
+GROUP.add_argument('-d', '--depth',
                    help='Specifies the folder maximum depth to be analyzed',
                    type=int, default=1)
-parser.add_argument('-t', '--tree-view', action='store_true',
+PARSER.add_argument('-t', '--tree-view', action='store_true',
                     help='Display the result in a tree mode')
 
-args = parser.parse_args()
+ARGS = PARSER.parse_args()
 
 
 # ==== Disk Space ====
 
+@contract
 def subprocess_check_output(command):
+    """ Function description.
+        :type command: string
+        :rtype: string
+    """
     return subprocess.check_output(command.strip().split(' '))
 
-
+@contract
 def bytes_to_readable(blocks):
+    """ Function description.
+        :type command: int,>=0
+        :rtype: string
+    """
     byts = blocks * 512
     readable_bytes = byts
     count = 0
@@ -51,17 +61,26 @@ def bytes_to_readable(blocks):
     labels = ['B', 'Kb', 'Mb', 'Gb', 'Tb']
     return '{:.2f}{}'.format(round(byts/(1024.0**count), 2), labels[count])
 
-
+@contract
 def print_tree(file_tree, file_tree_node, path, largest_size, total_size,
                depth=0):
+    """ Function description.
+        :type file_tree='dict(string: dict(string: string|list(string)|int))'
+        :type file_tree_node='dict(string: string|list(string)|int)'
+        :type path='string'
+        :type largest_size='int,>=0'
+        :type total_size='int,>=0'
+        :type depth='int,>=0'
+        :rtype: 'None'
+    """
     percentage = int(file_tree_node['size'] / float(total_size) * 100)
 
-    if percentage < args.hide:
+    if percentage < ARGS.hide:
         return
 
     print('{:>{}s} {:>4d}%  '.format(file_tree_node['print_size'],
                                      largest_size, percentage), end='')
-    if args.tree_view:
+    if ARGS.tree_view:
         print('{}{}'.format('   '*depth, os.path.basename(path)))
     else:
         print(path)
@@ -71,8 +90,14 @@ def print_tree(file_tree, file_tree_node, path, largest_size, total_size,
             print_tree(file_tree, file_tree[child], child, largest_size,
                        total_size, depth + 1)
 
-
+@contract
 def show_space_list(directory='.', depth=-1, order=True):
+    """ Function description.
+        :type directory='string'
+        :type depth='int'
+        :type order='boolean'
+        :rtype: 'None'
+    """
     abs_directory = os.path.abspath(directory)
 
     cmd = 'du '
@@ -138,13 +163,16 @@ def show_space_list(directory='.', depth=-1, order=True):
     print_tree(file_tree, file_tree[abs_directory], abs_directory,
                largest_size, total_size)
 
-
+@contract
 def main():
-    if not args.all:
-        show_space_list(args.directory, args.depth,
-                        order=(args.order == 'desc'))
+    """ Function description.
+        :rtype: 'None'
+    """
+    if not ARGS.all:
+        show_space_list(ARGS.directory, ARGS.depth,
+                        order=(ARGS.order == 'desc'))
     else:
-        show_space_list(args.directory, order=(args.order == 'desc'))
+        show_space_list(ARGS.directory, order=(ARGS.order == 'desc'))
 
 if __name__ == '__main__':
     main()
