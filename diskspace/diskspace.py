@@ -6,7 +6,7 @@ import argparse
 import os
 import subprocess
 import re
-from contracts import contract
+from contracts import contract, new_contract
 
 
 
@@ -40,8 +40,8 @@ ARGS = PARSER.parse_args()
 @contract
 def subprocess_check_output(command):
     """ Function description.
-        :type command: string
-        :rtype: string
+        :type command: str
+        :rtype: str
     """
     return subprocess.check_output(command.strip().split(' '))
 
@@ -49,7 +49,7 @@ def subprocess_check_output(command):
 def bytes_to_readable(blocks):
     """ Function description.
         :type command: int,>=0
-        :rtype: string
+        :rtype: str
     """
     byts = blocks * 512
     readable_bytes = byts
@@ -65,13 +65,13 @@ def bytes_to_readable(blocks):
 def print_tree(file_tree, file_tree_node, path, largest_size, total_size,
                depth=0):
     """ Function description.
-        :type file_tree='dict(string: dict(string: string|list(string)|int))'
-        :type file_tree_node='dict(string: string|list(string)|int)'
-        :type path='string'
-        :type largest_size='int,>=0'
-        :type total_size='int,>=0'
-        :type depth='int,>=0'
-        :rtype: 'None'
+        :type file_tree: dict
+        :type file_tree_node: dict
+        :type path: str
+        :type largest_size: int,>=0
+        :type total_size: int,>=0
+        :type depth: int,>=0
+        :rtype: None
     """
     percentage = int(file_tree_node['size'] / float(total_size) * 100)
 
@@ -93,10 +93,10 @@ def print_tree(file_tree, file_tree_node, path, largest_size, total_size,
 @contract
 def show_space_list(directory='.', depth=-1, order=True):
     """ Function description.
-        :type directory='string'
-        :type depth='int'
-        :type order='boolean'
-        :rtype: 'None'
+        :type directory: str
+        :type depth: int
+        :type order: bool
+        :rtype: None
     """
     abs_directory = os.path.abspath(directory)
 
@@ -166,7 +166,7 @@ def show_space_list(directory='.', depth=-1, order=True):
 @contract
 def main():
     """ Function description.
-        :rtype: 'None'
+        :rtype: None
     """
     if not ARGS.all:
         show_space_list(ARGS.directory, ARGS.depth,
